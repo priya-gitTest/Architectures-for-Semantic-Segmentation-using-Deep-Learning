@@ -4,8 +4,7 @@ This repository contains the implementations of [U-Net](https://lmb.informatik.u
 
 ## Data
 
-The `data` folder contains pre-processed images, converted to .tif format from 3-D volume tiff as present in the [challenge website](http://brainiac2.mit.edu/isbi_challenge/). The pre-processed images were taken from [here](https://github.com/zhixuhao/unet).
-
+The `data` folder contains pre-processed images, converted to .tif format from 3-D volume tiff as present in the [challenge website](http://brainiac2.mit.edu/isbi_challenge/).
 ## Architectures
 
 - ### U-Net
@@ -58,3 +57,6 @@ python run_unet.py
 
 Install them using [pip](https://pypi.python.org/pypi/pip).
 
+## References
+
+The pre-processed images and most part of `data_prep.py` were taken from [here](https://github.com/zhixuhao/unet).
