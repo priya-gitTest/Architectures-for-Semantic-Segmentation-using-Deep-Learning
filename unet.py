@@ -1,5 +1,5 @@
 from utils import *
-from os.path import exists
+from os.path import exists, join
 from os import mkdir
 
 import numpy as np
@@ -17,7 +17,7 @@ class Unet(object):
     encoder-decoder architecture proposed in https://arxiv.org/abs/1605.06211.
 
     """
-    def __init__(self, imgs_train, imgs_mask_train, imgs_test, batch_size=4, epochs=20, log_dir='./tb_logs/', 
+    def __init__(self, imgs_train, imgs_mask_train, imgs_test, base=16, batch_size=4, epochs=20, log_dir='./tb_logs/', 
                  checkpoint_dir='./weights', learning_rate=1e-4, keep_prob=0.5, img_rows = 512, img_cols = 512):
         """
         PARAMETERS
@@ -31,6 +31,9 @@ class Unet(object):
 
         imgs_test: 4-D numpy array, dtype=float
                    Images to be tested
+
+        base: int, default=16
+              The number of convolutional filters to use in the first stage
 
         batch_size: int, default=4
                     Batch size used for training
@@ -60,6 +63,7 @@ class Unet(object):
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.imgs_train = imgs_train
+        self.base = base
         self.batch_size = batch_size
         self.epochs = epochs
 
@@ -72,8 +76,8 @@ class Unet(object):
         self.log_dir = log_dir
         self.checkpoint_dir = checkpoint_dir
 
-        self.self.learning_rate = learning_rate
-        self.keep_prob = keep_probs
+        self.learning_rate = learning_rate
+        self.keep_prob = keep_prob
         self.imgs_mask_train = imgs_mask_train
         self.imgs_test = imgs_test
 
@@ -192,73 +196,73 @@ class Unet(object):
         inputs = Input((self.img_rows, self.img_cols,1))
 
         stage = '1'
-        out1 = self.convolutional_block(inputs, base, 3, stage=stage, block='1', padding = 'same')
-        out1 = self.convolutional_block(out1, base, 3, stage=stage, block='2', padding = 'same')
+        out1 = self.convolutional_block(inputs, self.base, 3, stage=stage, block='1', padding = 'same')
+        out1 = self.convolutional_block(out1, self.base, 3, stage=stage, block='2', padding = 'same')
 
         pool1 = MaxPooling2D(pool_size=(2, 2))(out1)
 
 
         stage = '2'
-        out2 = self.convolutional_block(pool1, base * 2, 3, stage=stage, block='1', padding = 'same')
-        out2 = self.convolutional_block(out2, base * 2, 3, stage=stage, block='2', padding = 'same')
+        out2 = self.convolutional_block(pool1, self.base * 2, 3, stage=stage, block='1', padding = 'same')
+        out2 = self.convolutional_block(out2, self.base * 2, 3, stage=stage, block='2', padding = 'same')
 
         drop2= Dropout(self.keep_prob, name='drop2')(out2)
         pool2 = MaxPooling2D(pool_size=(2, 2), name='pool2')(drop2)
 
 
         stage = '3'
-        out3 = self.convolutional_block(pool2, base * 4, 3, stage=stage, block='1', padding = 'same')
-        out3 = self.convolutional_block(out3, base * 4, 3, stage=stage, block='2', padding = 'same')
+        out3 = self.convolutional_block(pool2, self.base * 4, 3, stage=stage, block='1', padding = 'same')
+        out3 = self.convolutional_block(out3, self.base * 4, 3, stage=stage, block='2', padding = 'same')
 
         drop3 = Dropout(self.keep_prob, name='drop3')(out3) 
         pool3 = MaxPooling2D(pool_size=(2, 2), name='pool3')(drop3)
 
 
         stage = '4'
-        out4 = self.convolutional_block(pool3, base * 8, 3, stage=stage, block='1', padding = 'same')
-        out4 = self.convolutional_block(out4, base * 8, 3, stage=stage, block='2', padding = 'same')
+        out4 = self.convolutional_block(pool3, self.base * 8, 3, stage=stage, block='1', padding = 'same')
+        out4 = self.convolutional_block(out4, self.base * 8, 3, stage=stage, block='2', padding = 'same')
 
         drop4 = Dropout(self.keep_prob, name='drop4')(out4)    
         pool4 = MaxPooling2D(pool_size=(2, 2), name='pool4')(drop4)
 
 
         stage = '5'
-        out5 = self.convolutional_block(pool4, base * 16, 3, stage=stage, block='1', padding = 'same')
-        out5 = self.convolutional_block(out5, base * 16, 3, stage=stage, block='2', padding = 'same')
+        out5 = self.convolutional_block(pool4, self.base * 16, 3, stage=stage, block='1', padding = 'same')
+        out5 = self.convolutional_block(out5, self.base * 16, 3, stage=stage, block='2', padding = 'same')
 
         drop5 = Dropout(self.keep_prob, name='drop5')(out5)
 
 
         stage = '6'
-        out6 = self.deconvolutional_block(drop5, base * 8, stage=stage, block='1')
+        out6 = self.deconvolutional_block(drop5, self.base * 8, stage=stage, block='1')
         concatenate6 = concatenate([drop4, out6], axis = 3, name='concat6')
 
-        out6 = self.convolutional_block(concatenate6, base * 8, 3, stage=stage, block='2', padding = 'same')
-        out6 = self.convolutional_block(out6, base * 8, 3, stage=stage, block='3', padding = 'same')
+        out6 = self.convolutional_block(concatenate6, self.base * 8, 3, stage=stage, block='2', padding = 'same')
+        out6 = self.convolutional_block(out6, self.base * 8, 3, stage=stage, block='3', padding = 'same')
 
 
-        out7 =  self.deconvolutional_block(out6, base * 4, stage='7', block='1')
+        out7 =  self.deconvolutional_block(out6, self.base * 4, stage='7', block='1')
         concatenate7 = concatenate([drop3, out7], axis = 3, name='concat7')
 
         stage = '7'
-        out7 = self.convolutional_block(concatenate7, base * 4, 3, stage=stage, block='2', padding = 'same')
-        out7 = self.convolutional_block(out7, base * 4, 3, stage=stage, block='3', padding = 'same')
+        out7 = self.convolutional_block(concatenate7, self.base * 4, 3, stage=stage, block='2', padding = 'same')
+        out7 = self.convolutional_block(out7, self.base * 4, 3, stage=stage, block='3', padding = 'same')
 
-        out8 = self.deconvolutional_block(out7, base * 2, stage='8', block='1')
+        out8 = self.deconvolutional_block(out7, self.base * 2, stage='8', block='1')
 
         concatenate8 = concatenate([drop2, out8], axis = 3, name='concat8')
 
         stage = '8'
-        out8 = self.convolutional_block(concatenate8, base * 2, 3, stage=stage, block='2', padding = 'same')
-        out8 = self.convolutional_block(out8, base * 2, 3, stage=stage, block='3', padding = 'same')
+        out8 = self.convolutional_block(concatenate8, self.base * 2, 3, stage=stage, block='2', padding = 'same')
+        out8 = self.convolutional_block(out8, self.base * 2, 3, stage=stage, block='3', padding = 'same')
 
 
         stage = '9'
-        out9 = self.deconvolutional_block(out8, base, stage=stage, block='1')
+        out9 = self.deconvolutional_block(out8, self.base, stage=stage, block='1')
         concatenate9 = concatenate([out1, out9], axis = 3, name='concat9')
 
-        out9 = self.convolutional_block(concatenate9, base, 3, stage=stage, block='2', padding = 'same')
-        out9 = self.convolutional_block(out9, base, 3, stage=stage, block='3', padding = 'same')
+        out9 = self.convolutional_block(concatenate9, self.base, 3, stage=stage, block='2', padding = 'same')
+        out9 = self.convolutional_block(out9, self.base, 3, stage=stage, block='3', padding = 'same')
 
         conv10 = Conv2D(1, 1, activation = 'sigmoid')(out9)
 
