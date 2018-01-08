@@ -161,7 +161,7 @@ class dataAugmentation(object):
 			self.augment(img, savedir, str(i))
 
 
-	def augment(self, img, save_to_dir, save_prefix, batch_size=1, save_format='png', imgnum=50):
+	def augment(self, img, save_to_dir, save_prefix, batch_size=1, save_format='tif', imgnum=50):
 		"""
 		augmentate one image
 
@@ -203,11 +203,10 @@ class dataAugmentation(object):
 
 class dataProcess(object):
 
-	def __init__(self, out_rows, out_cols, data_path = "../data/120x160/u-net/train/aug_images", 
-				 label_path = "../data/120x160/u-net/train/aug_masks", 
-				 test_path = "../data/120x160/u-net/test/images", 
-				 test_label_path = "../data/120x160/u-net/test/masks",
-				 npy_path = "../data/120x160/u-net/npydata", img_type = "png"):
+	def __init__(self, out_rows, out_cols, data_path = "./data/train/aug_images/", 
+				 label_path = "./data/train/aug_masks/", 
+				 test_path = "./data/test/", 
+				 npy_path = "./data/npydata/", img_type = "tif"):
 
 		self.out_rows = out_rows
 		self.out_cols = out_cols
@@ -215,7 +214,6 @@ class dataProcess(object):
 		self.label_path = label_path
 		self.img_type = img_type
 		self.test_path = test_path
-		self.test_label_path = test_label_path
 		self.npy_path = npy_path
 
 		if not os.path.exists(npy_path):
