@@ -17,8 +17,8 @@ class Unet(object):
     encoder-decoder architecture proposed in https://arxiv.org/abs/1605.06211.
 
     """
-    def __init__(self, imgs_train, imgs_mask_train, imgs_test, batch_size=4, epochs=20, log_dir='./tb_logs/', checkpoint_dir='./weights', 
-                 learning_rate=1e-4, keep_prob=0.5, img_rows = 128, img_cols = 160):
+    def __init__(self, imgs_train, imgs_mask_train, imgs_test, batch_size=4, epochs=20, log_dir='./tb_logs/', 
+                 checkpoint_dir='./weights', learning_rate=1e-4, keep_prob=0.5, img_rows = 128, img_cols = 160):
         """
         PARAMETERS
         ----------
@@ -98,7 +98,7 @@ class Unet(object):
 
     def convolutional_block(self, x, filters, kernel_size, stage=None, block=None, padding='valid'):
         """
-        Performs a convolution followed by Batch normalization.
+        Convolutional block performing a convolution followed by Batch normalization, with ReLU activation.
 
         PARAMETERS
         ----------
@@ -108,8 +108,8 @@ class Unet(object):
         filters: int,
                  Number of filters for the convolution
 
-        kernel_size: int or tuple,
-                     Specifies the kernel size for the convolution
+        kernel_size: int or tuple of integers,
+                     Kernel size for the convolution
 
         stage: string, default=None
                The stage in the architecture where the convolution is applied
@@ -140,7 +140,7 @@ class Unet(object):
                               strides=(2, 2)):
 
         """
-        Performs a transpose convolution followed by Batch normalization.
+        Deconvolutional block performing a transpose convolution followed by Batch normalization, with ReLU activation
 
         PARAMETERS
         ----------
@@ -148,10 +148,10 @@ class Unet(object):
            Input to the block
 
         filters: int,
-                 Number of filters for the operation
+                 Number of filters for the transpose convolution
 
-        kernel_size: int or tuple,
-                     Specifies the kernel size for the operation
+        kernel_size: int or tuple of integers,
+                     Kernel size for the transpose convolution
 
         stage: string, default=None
                The stage in the architecture where the operation is applied
@@ -159,8 +159,8 @@ class Unet(object):
         block: string, default=None
                The block number within the stage specified above
 
-        strides: int or tuple, default=(2, 2)
-                 The stride to be used for the operation
+        strides: int or tuple of integers, default=(2, 2)
+                 The stride to be used for the transpose convolution
 
         RETURNS
         -------
@@ -281,8 +281,6 @@ class Unet(object):
         model = self.get_unet()
         print(model.summary())
         
-        print("got unet")
-
         tb = TensorBoard(log_dir=self.log_dir, 
                          histogram_freq=0,
                          write_graph=True, 
@@ -303,8 +301,6 @@ class Unet(object):
                   validation_split=0.2, 
                   shuffle=True, 
                   callbacks=[checkpointer, tb])
-
-        return model
 
         print('Predicting test data')
 
