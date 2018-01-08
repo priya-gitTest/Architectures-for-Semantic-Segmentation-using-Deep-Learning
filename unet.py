@@ -1,10 +1,15 @@
+from utils import *
+from os.path import exists
+from os import mkdir
+
 class Unet(object):
     """
     The U-net architecture (https://arxiv.org/abs/1505.04597) inspired by the
     encoder-decoder architecture proposed in https://arxiv.org/abs/1605.06211.
 
     """
-    def __init__(self, imgs_train, imgs_mask_train, imgs_test, img_rows = 128, img_cols = 160):
+    def __init__(self, imgs_train, imgs_mask_train, imgs_test, batch_size=4, epochs=20, log_dir='./tb_logs/', checkpoint_dir='./weights', 
+                 learning_rate=1e-4, keep_prob=0.5, img_rows = 128, img_cols = 160):
         """
         PARAMETERS
         ----------
@@ -18,6 +23,24 @@ class Unet(object):
         imgs_test: 4-D numpy array, dtype=float
                    Images to be tested
 
+        batch_size: int, default=4
+                    Batch size used for training
+
+        epochs: int, default=20
+                Number of epochs to train the model
+
+        log_dir: string,
+                 location for tensorboard logs
+
+        checkpoint_dir: string,
+                        location for storing model checkpoints
+
+        learning_rate: float, default=1e-4
+                       Learning rate to be used for training
+
+        keep_prob: float, default=0.5
+                   Keep probability for Dropout
+
         img_rows: int, default=128
                   Height of each image
 
@@ -28,6 +51,20 @@ class Unet(object):
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.imgs_train = imgs_train
+        self.batch_size = batch_size
+        self.epochs = epochs
+
+        if not exists(log_dir):
+            mkdir(log_dir)
+
+        if not exists(checkpoint_dir):
+            mkdir(checkpoint_dir)
+
+        self.log_dir = log_dir
+        self.checkpoint_dir = checkpoint_dir
+
+        self.self.learning_rate = learning_rate
+        self.keep_prob = keep_probs
         self.imgs_mask_train = imgs_mask_train
         self.imgs_test = imgs_test
 
@@ -156,7 +193,7 @@ class Unet(object):
         out2 = self.convolutional_block(pool1, base * 2, 3, stage=stage, block='1', padding = 'same')
         out2 = self.convolutional_block(out2, base * 2, 3, stage=stage, block='2', padding = 'same')
 
-        drop2= Dropout(keep_prob, name='drop2')(out2)
+        drop2= Dropout(self.keep_prob, name='drop2')(out2)
         pool2 = MaxPooling2D(pool_size=(2, 2), name='pool2')(drop2)
 
 
@@ -164,7 +201,7 @@ class Unet(object):
         out3 = self.convolutional_block(pool2, base * 4, 3, stage=stage, block='1', padding = 'same')
         out3 = self.convolutional_block(out3, base * 4, 3, stage=stage, block='2', padding = 'same')
 
-        drop3 = Dropout(keep_prob, name='drop3')(out3) 
+        drop3 = Dropout(self.keep_prob, name='drop3')(out3) 
         pool3 = MaxPooling2D(pool_size=(2, 2), name='pool3')(drop3)
 
 
@@ -172,7 +209,7 @@ class Unet(object):
         out4 = self.convolutional_block(pool3, base * 8, 3, stage=stage, block='1', padding = 'same')
         out4 = self.convolutional_block(out4, base * 8, 3, stage=stage, block='2', padding = 'same')
 
-        drop4 = Dropout(keep_prob, name='drop4')(out4)    
+        drop4 = Dropout(self.keep_prob, name='drop4')(out4)    
         pool4 = MaxPooling2D(pool_size=(2, 2), name='pool4')(drop4)
 
 
@@ -180,7 +217,7 @@ class Unet(object):
         out5 = self.convolutional_block(pool4, base * 16, 3, stage=stage, block='1', padding = 'same')
         out5 = self.convolutional_block(out5, base * 16, 3, stage=stage, block='2', padding = 'same')
 
-        drop5 = Dropout(keep_prob, name='drop5')(out5)
+        drop5 = Dropout(self.keep_prob, name='drop5')(out5)
 
 
         stage = '6'
@@ -218,7 +255,7 @@ class Unet(object):
 
         model = Model(inputs=inputs, outputs = conv10)
 
-        model.compile(optimizer = Adam(lr = LEARNING_RATE, beta_1 = 0.99), loss = dice_coef_loss, metrics = [dice_coef])
+        model.compile(optimizer = Adam(lr = self.learning_rate, beta_1 = 0.99), loss = dice_coef_loss, metrics = [dice_coef])
 
         return model
 
@@ -237,12 +274,12 @@ class Unet(object):
         
         print("got unet")
 
-        tb = TensorBoard(log_dir=log_dir, 
+        tb = TensorBoard(log_dir=self.log_dir, 
                          histogram_freq=0,
                          write_graph=True, 
                          write_images=False)
 
-        checkpointer = ModelCheckpoint(join(checkpoint_dir, 'chkpts.{epoch:02d}-{val_loss:.2f}.hdf5'), 
+        checkpointer = ModelCheckpoint(join(self.checkpoint_dir, 'chkpts.{epoch:02d}-{val_loss:.2f}.hdf5'), 
                                        monitor='val_loss', 
                                        save_best_only=True, 
                                        save_weights_only=False, 
@@ -251,8 +288,8 @@ class Unet(object):
         print('Fitting model...')
 
         model.fit(imgs_train, imgs_mask_train,
-                  batch_size=BATCH_SIZE, 
-                  epochs=EPOCHS, 
+                  batch_size=self.batch_size, 
+                  epochs=self.epochs, 
                   verbose=1,
                   validation_split=0.2, 
                   shuffle=True, 
