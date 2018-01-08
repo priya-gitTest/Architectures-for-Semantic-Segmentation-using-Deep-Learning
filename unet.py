@@ -18,7 +18,7 @@ class Unet(object):
 
     """
     def __init__(self, imgs_train, imgs_mask_train, imgs_test, batch_size=4, epochs=20, log_dir='./tb_logs/', 
-                 checkpoint_dir='./weights', learning_rate=1e-4, keep_prob=0.5, img_rows = 128, img_cols = 160):
+                 checkpoint_dir='./weights', learning_rate=1e-4, keep_prob=0.5, img_rows = 512, img_cols = 512):
         """
         PARAMETERS
         ----------
@@ -50,10 +50,10 @@ class Unet(object):
         keep_prob: float, default=0.5
                    Keep probability for Dropout
 
-        img_rows: int, default=128
+        img_rows: int, default=512
                   Height of each image
 
-        img_cols: int, default=160
+        img_cols: int, default=512
                   Width of each image
         """
 

@@ -16,14 +16,14 @@ class dataAugmentation(object):
 	Finally, seperate augmentated image apart into train image and label
 	"""
 
-	def __init__(self, train_path="../data/train/image", label_path="../data/train/label",
-				 merge_path="../data/train/merge", aug_merge_path="../data/train/aug_merge", 
-				 aug_train_path="../data/train/aug_images", 
-				 aug_label_path="../data/train/aug_masks", img_type="png"):
+	def __init__(self, train_path="./data/train/image", label_path="./data/train/label",
+				 merge_path="./data/train/merge", aug_merge_path="./data/train/aug_merge", 
+				 aug_train_path="./data/train/aug_images", 
+				 aug_label_path="./data/train/aug_masks", img_type="tif"):
 		
 		"""
 		Using glob to get all .img_type form path
-		
+
 		"""
 
 		self.train_imgs = glob.glob(train_path+"/*."+img_type)
@@ -299,6 +299,6 @@ if __name__ == "__main__":
 	aug = dataAugmentation()
 	aug.Augmentation()
 	aug.splitMerge()
-	mydata = dataProcess(128,160)
+	mydata = dataProcess(512, 512)
 	mydata.create_train_data()
 	mydata.create_test_data()
