@@ -57,6 +57,12 @@ python run_unet.py
 
 Install them using [pip](https://pypi.python.org/pypi/pip).
 
+## Contributing
+Feel free to create a Pull Request to add other semantic segmentation architectures and/or benchmark results or various datasets. If you are a beginner, you can refer [this](https://opensource.guide/how-to-contribute/) for getting started.
+
+## Support
+If you found this useful, please consider starring(★) the repo so that it can reach a broader audience.
+
 ## References
 
 The pre-processed images and most part of `data_prep.py` were taken from [here](https://github.com/zhixuhao/unet).
