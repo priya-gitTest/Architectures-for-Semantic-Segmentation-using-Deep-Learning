@@ -1,5 +1,11 @@
 # Architectures-for-Semantic-Segmentation-using-Deep-Learning
 
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social)](https://twitter.com/intent/tweet?text=Keras%20Implementation%20of%20Semantic%20Segmentation%20architectures&url=https://github.com/dalmia/Architectures-for-Semantic-Segmentation-using-Deep-Learning&hashtags=deeplearning,computervision,segmentation,machinelearning,keras)
+
+[![apm](https://img.shields.io/apm/l/vim-mode.svg)]()
+[![Build Status](https://travis-ci.org/athityakumar/colorls.svg?branch=master)](https://travis-ci.org/athityakumar/colorls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=shields)](http://makeapullrequest.com)
+
 This repository contains the implementations of [U-Net](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/) and [V-Net](https://arxiv.org/abs/1606.04797) in Keras using TensorFlow backend. Also, `data_prep.py` contains the code for random elastic deformations applied to the input images for data augmentation, which were specified to be of importance in both the papers.
 
 ## Data
@@ -62,6 +68,9 @@ Feel free to create a Pull Request to add other semantic segmentation architectu
 
 ## Support
 If you found this useful, please consider starring(★) the repo so that it can reach a broader audience.
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/dalmia/Architectures-for-Semantic-Segmentation-using-Deep-Learning/blob/master/LICENSE) file for details.
 
 ## References
 
